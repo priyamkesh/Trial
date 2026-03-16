@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embedded Browser</title>
+    <style>
+        /* CSS architecture for a seamless, full-viewport browser UI */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background: #1e1e1e; 
+            font-family: system-ui, -apple-system, sans-serif; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+        }
+        .toolbar { 
+            background: #2d2d2d; 
+            padding: 10px 15px; 
+            display: flex; 
+            gap: 10px; 
+            align-items: center; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.6); 
+            z-index: 10; 
+        }
+        .toolbar input { 
+            flex: 1; 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            border: 1px solid #444; 
+            background: #1a1a1a; 
+            color: #fff; 
+            font-size: 14px; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
+        .toolbar input:focus { 
+            border-color: #0a84ff; 
+        }
+        .toolbar button { 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            border: none; 
+            background: #0a84ff; 
+            color: #fff; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: background 0.2s; 
+        }
+        .toolbar button:hover { 
+            background: #006ee6; 
+        }
+        #browser-view { 
+            flex: 1; 
+            border: none; 
+            width: 100%; 
+            background: #ffffff; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <input type="text" id="url-bar" placeholder="Enter URL (e.g., google.com) and press Enter" value="https://www.google.com">
+        <button id="nav-btn">Navigate</button>
+    </div>
+
+    <iframe id="browser-view" src="https://api.allorigins.win/raw?url=https%3A%2F%2Fwww.google.com" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+
+    <script>
+        // DOM Elements
+        const urlBar = document.getElementById('url-bar');
+        const navBtn = document.getElementById('nav-btn');
+        const browserView = document.getElementById('browser-view');
+
+        // Navigation Logic with CORS Proxy
+        const navigate = () => {
+            let url = urlBar.value.trim();
+            if (!url) return;
+            
+            // Auto-append protocol if missing to ensure proper routing
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            
+            // Update input field to reflect the active protocol
+            urlBar.value = url;
+
+            // Route through a public proxy to strip X-Frame-Options headers
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            browserView.src = proxyUrl + encodeURIComponent(url);
+        };
+
+        // Event Listeners for UI interaction
+        navBtn.addEventListener('click', navigate);
+        urlBar.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') navigate();
+        });
+    </script>
+</body>
+</html>
